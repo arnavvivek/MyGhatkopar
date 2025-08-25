@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MyGhatkopar</title>
+  <meta name="theme-color" content="#0ea5e9" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/icon-192.png" sizes="192x192" />
+  <link rel="apple-touch-icon" href="icons/icon-512.png" />
+
+  <style>
+    :root {
+      --bg:#0b1220; --bg-soft:#0f172a; --card:#0f172a; --card-2:#111827;
+      --text:#e5e7eb; --muted:#94a3b8; --border:#1f2937; --ring:#22d3ee;
+      --emergency:#ef4444; --approval:#3b82f6; --notice:#f59e0b; --sos:#10b981;
+      --radius:16px;
+    }
+    .light {
+      --bg:#f6f7fb; --bg-soft:#f1f5f9; --card:#ffffff; --card-2:#ffffff;
+      --text:#0f172a; --muted:#475569; --border:#e5e7eb;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background:linear-gradient(180deg,var(--bg) 0%, var(--bg-soft) 100%); color:var(--text);
+      padding-bottom:84px;
+    }
+    header{
+      position:sticky; top:0; z-index:20; backdrop-filter: blur(8px);
+      background:linear-gradient(180deg, rgba(15,23,42,.9) 0%, rgba(15,23,42,.6) 100%);
+      border-bottom:1px solid var(--border);
+      padding:12px 16px;
+    }
+    .light header{ background:linear-gradient(180deg, rgba(255,255,255,.9) 0%, rgba(255,255,255,.7) 100%); }
+    .topbar{display:flex;gap:12px;align-items:center;justify-content:space-between;}
+    .title{display:flex;gap:10px;align-items:center;font-weight:800}
+    .title .app{
+      padding:6px 10px;border-radius:999px;background:#0ea5e922;color:#22d3ee;border:1px solid #155e75;
+      font-size:12px; letter-spacing:.3px;
+    }
+    .actions{display:flex;gap:8px;align-items:center;}
+    .iconbtn{
+      border:1px solid var(--border); background:transparent; color:var(--text);
+      padding:8px 10px;border-radius:12px; cursor:pointer;
+    }
+    .searchrow{display:flex;gap:8px;margin-top:10px}
+    .searchrow input, .searchrow select, .searchrow select#lang {
+      flex:1; padding:11px 12px; border-radius:14px; border:1px solid var(--border);
+      background:var(--card); color:var(--text);
+    }
+    .searchrow select#lang{flex:0 0 160px}
+    .chips{display:flex; gap:8px; overflow:auto; padding:8px 0 2px 0}
+    .chip{
+      padding:8px 12px; border-radius:999px; border:1px solid var(--border);
+      background:var(--card-2); color:var(--text); font-size:13px; white-space:nowrap; cursor:pointer;
+    }
+    .chip.active{ outline:2px solid var(--ring); }
+    main{padding:16px; display:grid; gap:12px; max-width:900px; margin:0 auto;}
+    .card{
+      background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+      padding:14px; box-shadow: 0 10px 30px rgba(0,0,0,.12);
+      animation: rise .35s ease both;
+    }
+    @keyframes rise{ from{opacity:0; transform: translateY(8px)} to{opacity:1; transform:none} }
+    .card h3{margin:6px 0 8px; font-size:1rem}
+    .meta{font-size:12px;color:var(--muted); margin-bottom:6px; display:flex; gap:10px; flex-wrap:wrap}
+    .badge{display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:999px; font-size:12px; font-weight:700; color:#0b1220}
+    .badge.emergency{background: #fecaca;}
+    .badge.approvals{background:#bfdbfe;}
+    .badge.notices{background:#fde68a;}
+    .badge.sos{background:#bbf7d0;}
+    .actions-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
+    .btn{padding:8px 12px; border-radius:12px; border:1px solid var(--border); background:var(--card-2); color:var(--text); cursor:pointer; font-size:13px; text-decoration:none; display:inline-block}
+    .btn.primary{ background:#0ea5e9; color:#00111a; border:none; }
+    .btn.call{ background: #10b981; color:#00110a; border:none; }
+    .empty{opacity:.7; text-align:center; padding:40px 10px}
+    .bottomnav{
+      position:fixed; left:0; right:0; bottom:0; height:72px; display:flex; gap:6px; justify-content:space-around; align-items:center;
+      background:linear-gradient(180deg, rgba(15,23,42,.85) 0%, rgba(15,23,42,.95) 100%);
+      border-top:1px solid var(--border); z-index:30;
+    }
+    .light .bottomnav{ background:linear-gradient(180deg, rgba(255,255,255,.85) 0%, rgba(255,255,255,.95) 100%); }
+    .navbtn{
+      display:flex; flex-direction:column; align-items:center; gap:4px; font-size:12px; color:#cbd5e1; background:transparent; border:none; cursor:pointer;
+    }
+    .light .navbtn{ color:#334155; }
+    .navbtn.active{ color:#22d3ee; font-weight:700 }
+    .install-tip{ position:fixed; bottom:84px; right:16px; background:#0ea5e9; color:#06232c; padding:10px 12px; border-radius:12px; font-size:12px; display:none }
+    .hidden{display:none}
+    a.link{color:#38bdf8; text-decoration:none}
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="topbar">
+      <div class="title">
+        <img src="icons/icon-192.png" alt="app" width="28" height="28" style="border-radius:8px;box-shadow:0 0 0 1px var(--border)" />
+        <div>
+          <div id="appName">MyGhatkopar</div>
+          <div class="app" id="appTag">Community updates • Offline</div>
+        </div>
+      </div>
+      <div class="actions">
+        <select id="lang" aria-label="Language">
+          <option value="en">English</option>
+          <option value="hi">हिन्दी</option>
+          <option value="mr">मराठी</option>
+        </select>
+        <button id="darkToggle" class="iconbtn" title="Toggle Dark">🌙</button>
+        <button id="shareApp" class="iconbtn" title="Share App">🔗</button>
+      </div>
+    </div>
+
+    <div class="searchrow">
+      <input id="search" placeholder="Search updates e.g. water cut, fire, metro..." />
+      <select id="sort" aria-label="Sort">
+        <option value="new">Newest</option>
+        <option value="old">Oldest</option>
+      </select>
+    </div>
+
+    <div class="chips" id="chips">
+      <div class="chip active" data-section="all">All</div>
+      <div class="chip" data-section="emergency">🚨 Emergency</div>
+      <div class="chip" data-section="approvals">🏛 Approvals</div>
+      <div class="chip" data-section="notices">📢 Notices</div>
+      <div class="chip" data-section="sos">☎ SOS</div>
+    </div>
+  </header>
+
+  <main id="list" aria-live="polite"></main>
+
+  <div class="install-tip" id="installTip">Tap Menu ⋮ → Add to Home screen</div>
+
+  <nav class="bottomnav" role="navigation" aria-label="Bottom">
+    <button class="navbtn active" data-section="all">🏠 <span id="navHome">Home</span></button>
+    <button class="navbtn" data-section="emergency">🚨 <span id="navEmergency">Emergency</span></button>
+    <button class="navbtn" data-section="approvals">🏛 <span id="navApprovals">Approvals</span></button>
+    <button class="navbtn" data-section="notices">📢 <span id="navNotices">Notices</span></button>
+    <button class="navbtn" data-section="sos">☎ <span id="navSOS">SOS</span></button>
+  </nav>
+
+  <script>
+    // ---------- PWA registration ----------
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+    }
+
+    // ---------- i18n strings ----------
+    const t = {
+      en: {
+        appName: "MyGhatkopar",
+        appTag: "Community updates • Offline",
+        searchPH: "Search updates e.g. water cut, fire, metro...",
+        tabs: {all:"All", emergency:"🚨 Emergency", approvals:"🏛 Approvals", notices:"📢 Notices", sos:"☎ SOS"},
+        nav: {home:"Home", emergency:"Emergency", approvals:"Approvals", notices:"Notices", sos:"SOS"},
+        share: "Share", map: "Map", call: "Call", altCall: "Alt Call",
+        empty: "No updates."
+      },
+      hi: {
+        appName: "माय घाटकोपर",
+        appTag: "समुदाय अपडेट • ऑफ़लाइन",
+        searchPH: "खोजें: पानी कट, आग, मेट्रो...",
+        tabs: {all:"सभी", emergency:"🚨 आपातकाल", approvals:"🏛 अनुमोदन", notices:"📢 नोटिस", sos:"☎ आपात सहायता"},
+        nav: {home:"होम", emergency:"आपातकाल", approvals:"अनुमोदन", notices:"नोटिस", sos:"आपात"},
+        share: "शेयर", map: "मानचित्र", call: "कॉल", altCall: "वैकल्पिक कॉल",
+        empty: "कोई अपडेट नहीं."
+      },
+      mr: {
+        appName: "माय घाटकोपर",
+        appTag: "समुदाय अद्यतन • ऑफलाइन",
+        searchPH: "शोधा: पाणी कपात, आग, मेट्रो...",
+        tabs: {all:"सर्व", emergency:"🚨 आपत्काल", approvals:"🏛 मान्यता", notices:"📢 सूचना", sos:"☎ आपत्कालीन"},
+        nav: {home:"मुख्य", emergency:"आपत्काल", approvals:"मान्यता", notices:"सूचना", sos:"आपत्कालीन"},
+        share: "शेअर", map: "नकाशा", call: "कॉल", altCall: "पर्यायी कॉल",
+        empty: "कोणतेही अद्यतन नाही."
+      }
+    };
+
+    // ---------- Demo data (localized titles/descriptions; phone links always work) ----------
+    const data = {
+      en: [
+        {id:1,type:'emergency',title:'Minor fire near R City Mall',details:'Fire brigade contained a small blaze near service lane. No casualties.',area:'LBS Marg, Amrut Nagar (W)',when:new Date().toISOString()},
+        {id:2,type:'emergency',title:'Waterlogging on Station Road',details:'Traffic diverted via Tilak Road; expect delays.',area:'Ghatkopar East',when:new Date(Date.now()-3600e3).toISOString()},
+        {id:3,type:'approvals',title:'90 Feet Road widening sanctioned',details:'Phase-wise expansion approved to ease congestion.',area:'Ghatkopar East',when:'2025-08-20T10:00:00'},
+        {id:4,type:'approvals',title:'Footpath improvements approved',details:'Ramps and tiling near Pant Nagar market.',area:'Pant Nagar',when:'2025-08-18T09:30:00'},
+        {id:5,type:'notices',title:'Water cut tomorrow 10:00–16:00',details:'Valve replacement; store water in advance.',area:'Pant Nagar, Garodia Nagar',when:'2025-08-26T10:00:00'},
+        {id:6,type:'notices',title:'Planned power maintenance 14:00–16:00',details:'Elevators may be unavailable.',area:'Ghatkopar West',when:'2025-08-27T14:00:00'},
+        {id:7,type:'sos',title:'Rajawadi Hospital – Emergency',details:'24×7 casualty.',area:'Ghatkopar East',when:new Date().toISOString(),phone:'+912225115066',link:'https://maps.google.com/?q=Rajawadi+Hospital+Ghatkopar'},
+        {id:8,type:'sos',title:'Pant Nagar Police Station',details:'Police assistance.',area:'Pant Nagar',when:new Date().toISOString(),phone:'+912225013624',phone2:'+912221028914',link:'https://maps.google.com/?q=Pant+Nagar+Police+Station+Ghatkopar'},
+        {id:9,type:'sos',title:'Fire Brigade (Mumbai Control Room)',details:'City fire emergency.',area:'Citywide',when:new Date().toISOString(),phone:'101',phone2:'+912223076111'},
+        {id:10,type:'sos',title:'Ambulance (108)',details:'State emergency ambulance service.',area:'Citywide',when:new Date().toISOString(),phone:'108'}
+      ],
+      hi: [
+        {id:1,type:'emergency',title:'आर सिटी मॉल के पास मामूली आग',details:'फायर ब्रिगेड ने आग पर काबू पा लिया। कोई हताहत नहीं।',area:'एलबीएस मार्ग, अमृत नगर (प.)',when:new Date().toISOString()},
+        {id:2,type:'emergency',title:'स्टेशन रोड पर पानी भराव',details:'ट्रैफिक तिलक रोड की ओर मोड़ा गया।',area:'घाटकोपर (पू.)',when:new Date(Date.now()-3600e3).toISOString()},
+        {id:3,type:'approvals',title:'90 फीट रोड चौड़ीकरण स्वीकृत',details:'भीड़ कम करने हेतु स्वीकृति।',area:'घाटकोपर (पू.)',when:'2025-08-20T10:00:00'},
+        {id:4,type:'approvals',title:'फुटपाथ सुधार योजना',details:'पेंट नगर बाजार के पास रैंप व टाइलिंग।',area:'पंत नगर',when:'2025-08-18T09:30:00'},
+        {id:5,type:'notices',title:'कल 10:00–16:00 पानी बंद',details:'वाल्व बदलने का काम; पानी पहले से भरें।',area:'पंत नगर, गरोडिया नगर',when:'2025-08-26T10:00:00'},
+        {id:6,type:'notices',title:'नियोजित बिजली बंद 14:00–16:00',details:'लिफ्ट अस्थायी रूप से बंद रह सकती है।',area:'घाटकोपर (प.)',when:'2025-08-27T14:00:00'},
+        {id:7,type:'sos',title:'राजावाडी अस्पताल – आपात',details:'24×7 आपात सेवा।',area:'घाटकोपर (पू.)',when:new Date().toISOString(),phone:'+912225115066',link:'https://maps.google.com/?q=Rajawadi+Hospital+Ghatkopar'},
+        {id:8,type:'sos',title:'पंत नगर पुलिस स्टेशन',details:'पुलिस सहायता।',area:'पंत नगर',when:new Date().toISOString(),phone:'+912225013624',phone2:'+912221028914',link:'https://maps.google.com/?q=Pant+Nagar+Police+Station+Ghatkopar'},
+        {id:9,type:'sos',title:'फायर ब्रिगेड (मुंबई कंट्रोल रूम)',details:'शहर अग्नि आपातकाल।',area:'समूचा शहर',when:new Date().toISOString(),phone:'101',phone2:'+912223076111'},
+        {id:10,type:'sos',title:'एम्बुलेंस (108)',details:'राज्य आपातकालीन एम्बुलेंस सेवा।',area:'समूचा शहर',when:new Date().toISOString(),phone:'108'}
+      ],
+      mr: [
+        {id:1,type:'emergency',title:'आर सिटी मॉलजवळ किरकोळ आग',details:'फायर ब्रिगेडने आग विझवली. कोणतीही जीवितहानी नाही.',area:'एलबीएस मार्ग, अमृत नगर (प.)',when:new Date().toISOString()},
+        {id:2,type:'emergency',title:'स्टेशन रोडवर पाणी साचणे',details:'वाहतूक तिलक रस्त्याकडे वळवली.',area:'घाटकोपर (पू.)',when:new Date(Date.now()-3600e3).toISOString()},
+        {id:3,type:'approvals',title:'90 फूट रोड रुंदीकरण मंजूर',details:'वाहतूक कोंडी कमी करण्यासाठी मंजुरी.',area:'घाटकोपर (पू.)',when:'2025-08-20T10:00:00'},
+        {id:4,type:'approvals',title:'फुटपाथ सुधार प्रकल्प',details:'पंत नगर बाजाराजवळ रॅम्प व टाइलिंग.',area:'पंत नगर',when:'2025-08-18T09:30:00'},
+        {id:5,type:'notices',title:'उद्या 10:00–16:00 पाणी कपात',details:'व्हॉल्व बदल; पाणी साठवा.',area:'पंत नगर, गरोडिया नगर',when:'2025-08-26T10:00:00'},
+        {id:6,type:'notices',title:'नियत वीज देखभाल 14:00–16:00',details:'लिफ्ट तात्पुरती बंद असू शकते.',area:'घाटकोपर (प.)',when:'2025-08-27T14:00:00'},
+        {id:7,type:'sos',title:'राजावाडी रुग्णालय – आपत्काल',details:'24×7 आपतकालीन सेवा.',area:'घाटकोपर (पू.)',when:new Date().toISOString(),phone:'+912225115066',link:'https://maps.google.com/?q=Rajawadi+Hospital+Ghatkopar'},
+        {id:8,type:'sos',title:'पंत नगर पोलीस ठाणे',details:'पोलीस मदत.',area:'पंत नगर',when:new Date().toISOString(),phone:'+912225013624',phone2:'+912221028914',link:'https://maps.google.com/?q=Pant+Nagar+Police+Station+Ghatkopar'},
+        {id:9,type:'sos',title:'फायर ब्रिगेड (मुंबई नियंत्रण कक्ष)',details:'शहर अग्नि आपत्काल.',area:'मुंबई',when:new Date().toISOString(),phone:'101',phone2:'+912223076111'},
+        {id:10,type:'sos',title:'ॲम्ब्युलन्स (108)',details:'राज्य आपतकालीन ॲम्ब्युलन्स सेवा.',area:'मुंबई',when:new Date().toISOString(),phone:'108'}
+      ]
+    };
+
+    // ---------- State ----------
+    const state = {
+      section: 'all',
+      search: '',
+      sort: 'new',
+      lang: localStorage.getItem('lang') || 'en',
+      dark: localStorage.getItem('dark') === '1'
+    };
+
+    // ---------- Elements ----------
+    const listEl = document.getElementById('list');
+    const chips = document.querySelectorAll('#chips .chip');
+    const navbtns = document.querySelectorAll('.navbtn');
+    const searchInput = document.getElementById('search');
+    const sortSelect = document.getElementById('sort');
+    const langSelect = document.getElementById('lang');
+    const appNameEl = document.getElementById('appName');
+    const appTagEl = document.getElementById('appTag');
+    const darkToggle = document.getElementById('darkToggle');
+
+    // ---------- UI helpers ----------
+    const labelMap = (lng)=>({
+      emergency:'🚨 ' + t[lng].tabs.emergency.replace('🚨 ',''),
+      approvals:'🏛 ' + t[lng].tabs.approvals.replace('🏛 ',''),
+      notices:'📢 ' + t[lng].tabs.notices.replace('📢 ',''),
+      sos:'☎ ' + t[lng].tabs.sos.replace('☎ ',''),
+    });
+    function badge(type,lng){
+      const m = labelMap(lng);
+      return `<span class="badge ${type}">${m[type]||type}</span>`;
+    }
+    function iconFor(type){
+      return type==='emergency'?'🚨':type==='approvals'?'🏗️':type==='notices'?'📢':'☎';
+    }
+
+    function applyLang(){
+      const lng = state.lang;
+      langSelect.value = lng;
+      appNameEl.textContent = t[lng].appName;
+      appTagEl.textContent = t[lng].appTag;
+      searchInput.placeholder = t[lng].searchPH;
+      document.querySelector('[data-section="all"]').textContent = t[lng].tabs.all;
+      document.querySelector('[data-section="emergency"]').textContent = t[lng].tabs.emergency;
+      document.querySelector('[data-section="approvals"]').textContent = t[lng].tabs.approvals;
+      document.querySelector('[data-section="notices"]').textContent = t[lng].tabs.notices;
+      document.querySelector('[data-section="sos"]').textContent = t[lng].tabs.sos;
+      document.getElementById('navHome').textContent = t[lng].nav.home;
+      document.getElementById('navEmergency').textContent = t[lng].nav.emergency;
+      document.getElementById('navApprovals').textContent = t[lng].nav.approvals;
+      document.getElementById('navNotices').textContent = t[lng].nav.notices;
+      document.getElementById('navSOS').textContent = t[lng].nav.sos;
+      localStorage.setItem('lang', lng);
+      render();
+    }
+
+    function applyDark(){
+      document.documentElement.style.colorScheme = state.dark ? 'dark' : 'light';
+      document.body.classList.toggle('light', !state.dark);
+      localStorage.setItem('dark', state.dark?'1':'0');
+      darkToggle.textContent = state.dark ? '🌙' : '☀️';
+    }
+
+    function render(){
+      const lng = state.lang;
+      let items = data[lng].slice();
+      if(state.section!=='all') items = items.filter(x=>x.type===state.section);
+      if(state.search) items = items.filter(x => (x.title+x.details+x.area).toLowerCase().includes(state.search.toLowerCase()));
+      items.sort((a,b)=> state.sort==='new' ? (new Date(b.when)-new Date(a.when)) : (new Date(a.when)-new Date(b.when)));
+
+      listEl.innerHTML = items.map(x => {
+        const whenStr = new Date((x.when||'').toString()).toLocaleString();
+        const callBtns = x.type==='sos'
+          ? (x.phone?`<a class="btn call" href="tel:${x.phone}">${t[lng].call}</a>`:'') +
+            (x.phone2?` <a class="btn call" href="tel:${x.phone2}">${t[lng].altCall}</a>`:'')
+          : '';
+        const mapBtn = x.link ? `<a class="btn" target="_blank" rel="noopener" href="${x.link}">${t[lng].map}</a>` : '';
+        return `
+          <article class="card">
+            <div class="meta">
+              <span>${whenStr}</span> <span>•</span> <span>${badge(x.type,lng)}</span>
+            </div>
+            <h3>${iconFor(x.type)} ${x.title}</h3>
+            <div>${x.details}</div>
+            <div class="meta">📍 ${x.area}</div>
+            <div class="actions-row">
+              ${callBtns}
+              ${mapBtn}
+              <button class="btn" onclick="share('${x.title} — ${x.details}')">${t[lng].share}</button>
+            </div>
+          </article>
+        `;
+      }).join('') || `<div class="empty">${t[lng].empty}</div>`;
+    }
+
+    // ---------- Events ----------
+    searchInput.addEventListener('input', (e)=>{ state.search=e.target.value.trim(); render(); });
+    sortSelect.addEventListener('change', (e)=>{ state.sort=e.target.value; render(); });
+    langSelect.addEventListener('change', (e)=>{ state.lang=e.target.value; applyLang(); });
+
+    document.querySelectorAll('#chips .chip').forEach(c => c.addEventListener('click', ()=>{
+      document.querySelectorAll('#chips .chip').forEach(ch => ch.classList.remove('active'));
+      c.classList.add('active');
+      state.section = c.dataset.section;
+      navbtns.forEach(n=> n.classList.toggle('active', n.dataset.section===state.section));
+      render();
+    }));
+    navbtns.forEach(n => n.addEventListener('click', ()=>{
+      navbtns.forEach(x=>x.classList.remove('active'));
+      n.classList.add('active');
+      state.section = n.dataset.section;
+      document.querySelectorAll('#chips .chip').forEach(ch => ch.classList.toggle('active', ch.dataset.section===state.section));
+      render();
+    }));
+
+    // Share
+    function share(text){
+      if (navigator.share) navigator.share({title:'MyGhatkopar', text}).catch(()=>{});
+      else navigator.clipboard.writeText(text);
+    }
+    window.share = share;
+
+    // Dark mode
+    darkToggle.addEventListener('click', ()=>{ state.dark=!state.dark; applyDark(); });
+
+    // Before-install prompt tip
+    window.addEventListener('beforeinstallprompt', (e)=>{
+      e.preventDefault();
+      document.getElementById('installTip').style.display='block';
+    });
+
+    // ---------- Init ----------
+    (function init(){
+      // restore settings
+      if(!['en','hi','mr'].includes(state.lang)) state.lang='en';
+      applyDark();
+      applyLang();
+    })();
+  </script>
+</body>
+</html>
